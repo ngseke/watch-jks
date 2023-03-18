@@ -1,0 +1,46 @@
+{
+  "name": "watch-jks",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev index.ts",
+    "start": "npm run dev",
+    "lint": "npx eslint . --ext .ts,.js,.cjs,.vue",
+    "lint:fix": "npx eslint --fix . --ext .ts,.js,.cjs,.vue"
+  },
+  "engines": {
+    "node": ">=16",
+    "npm": "please-use-pnpm",
+    "yarn": "please-use-pnpm",
+    "pnpm": ">=7"
+  },
+  "keywords": [],
+  "author": "ngseke <ngseke@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.3.4",
+    "dayjs": "^1.11.7",
+    "dotenv": "^16.0.3",
+    "fs-extra": "^11.1.0",
+    "jsdom": "^21.1.1",
+    "node-telegram-bot-api": "^0.61.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.1",
+    "@types/jsdom": "^21.1.0",
+    "@types/node": "^18.11.18",
+    "@types/node-telegram-bot-api": "^0.57.6",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.48.0",
+    "eslint": "^8.0.1",
+    "eslint-config-standard-with-typescript": "^26.0.0",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-n": "^15.0.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "tslib": "^2.4.1",
+    "typescript": "^4.9.4"
+  }
+}
