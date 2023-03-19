@@ -2,12 +2,13 @@
   "name": "watch-jks",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "dev": "ts-node-dev index.ts",
-    "start": "npm run dev",
-    "lint": "npx eslint . --ext .ts,.js,.cjs,.vue",
-    "lint:fix": "npx eslint --fix . --ext .ts,.js,.cjs,.vue"
+    "build": "rm -rf dist && ncc build index.ts -m -o dist",
+    "start": "node dist/index",
+    "lint": "npx eslint . --ext .ts,.js,.cjs",
+    "lint:fix": "npx eslint --fix . --ext .ts,.js,.cjs"
   },
   "engines": {
     "node": ">=16",
@@ -33,6 +34,7 @@
     "@types/node-telegram-bot-api": "^0.57.6",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.48.0",
+    "@vercel/ncc": "^0.36.1",
     "eslint": "^8.0.1",
     "eslint-config-standard-with-typescript": "^26.0.0",
     "eslint-plugin-import": "^2.25.2",
