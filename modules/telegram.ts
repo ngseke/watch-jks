@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import TelegramBot from 'node-telegram-bot-api'
 import { TELEGRAM_BOT_TOKEN } from './constants'
 import { getCrawledAt } from './crawler'
-import { loadRecentProducts, Product } from './products'
+import { loadProducts, loadRecentProducts, Product } from './products'
 import { addReceiver, loadReceivers, removeReceiver } from './receivers'
 
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true })
@@ -42,15 +42,22 @@ const getDefaultMessage = async (chatId: number) => {
   const isSubscribed = receivers.has(chatId)
 
   const subscribeStatusMessage = isSubscribed
-    ? `\n✅ You are already subscribed. (id: ${chatId})`
+    ? `\n✅ You are already subscribed. <i>(id: ${chatId})</i>`
     : ''
 
   const crawledAt = getCrawledAt()
   const crawledAtMessage = crawledAt
-    ? `\n⏰ Last crawled at ${formatDateTime(crawledAt)}`
+    ? `\n⏰ Last crawled at: <b>${formatDateTime(crawledAt)}</b>`
     : ''
-  return `🐟 Hi, I'm Watch JKS Bot${crawledAtMessage}
-  ${subscribeStatusMessage}`
+
+  const products = (await loadProducts())
+  const count = Object.keys(products).length
+  const countMessage = count
+    ? `\n⏰ Crawled products count: <b>${count}</b>`
+    : ''
+
+  return `🐟 Hi, I'm Watch JKS Bot
+  ${countMessage}${crawledAtMessage}${subscribeStatusMessage}`
 }
 
 export function startListener () {
@@ -82,7 +89,11 @@ export function startListener () {
         return
       }
 
-      await bot.sendMessage(chatId, await getDefaultMessage(chatId))
+      await bot.sendMessage(
+        chatId,
+        await getDefaultMessage(chatId),
+        { parse_mode: 'HTML' }
+      )
     })()
   })
 }
