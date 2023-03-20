@@ -4,7 +4,7 @@ import { startWeb } from './modules/web'
 
 startListener()
 
-setInterval(task, 1000 * 60 * 30)
+setInterval(task, 1000 * 60 * 10)
 task()
 
 startWeb()
