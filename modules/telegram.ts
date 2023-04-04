@@ -54,7 +54,7 @@ const getDefaultMessage = async (chatId: number) => {
 
   const subscribeStatusMessage = isSubscribed
     ? `\n✅ You are already subscribed. <i>(id: ${chatId})</i>`
-    : ''
+    : '\n\n💡 Type /subscribe to subscribe now!'
 
   const crawledAt = getCrawledAt()
   const crawledAtMessage = crawledAt
@@ -67,8 +67,12 @@ const getDefaultMessage = async (chatId: number) => {
     ? `\n⏰ Crawled products count: <b>${count}</b>`
     : ''
 
-  return `🐟 Hi, I'm Watch JKS Bot
-  ${countMessage}${crawledAtMessage}${subscribeStatusMessage}`
+  return [
+    '🐟 Hi, I\'m Watch JKS Bot\n',
+    countMessage,
+    crawledAtMessage,
+    subscribeStatusMessage,
+  ].join('')
 }
 
 export function startListener () {
