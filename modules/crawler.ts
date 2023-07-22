@@ -22,15 +22,14 @@ export async function crawl () {
   crawledAt = +new Date()
 
   const products = productElements.map<Product>((el) => {
-    const select = (selector: string) => el.querySelector(selector)
+    const $ = (selector: string) => el.querySelector(selector)
 
-    const name = select('.title')?.textContent ?? '-'
-    const rawPrice = select('.price:not(.price-crossed)')?.textContent
+    const name = $('.title')?.textContent ?? '-'
+    const rawPrice = $('.price:not(.price-crossed)')?.textContent
     const price = Number(rawPrice?.replaceAll('NT$', '').replaceAll(',', '')) ?? 0
-    const link = select('a')?.getAttribute('href') ?? '-'
-    const backgroundImage = (select('.boxify-image') as HTMLDivElement)
-      .style.backgroundImage
-    const img = extractBackground(backgroundImage)
+    const link = $('a')?.getAttribute('href') ?? '-'
+    const srcSetString = $('.boxify-image img')?.getAttribute('data-srcset')
+    const img = srcSetString?.split('?')[0] ?? ''
 
     return { name, price, link, img, crawledAt }
   })

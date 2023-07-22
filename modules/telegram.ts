@@ -20,6 +20,10 @@ export async function send (chatId: number, product: Product) {
     `\n<i>(crawled at: ${formatDateTime(product.crawledAt)})</i>`,
   ].join('\n')
 
+  if (!product.img) {
+    await bot.sendMessage(chatId, caption, { parse_mode: 'HTML' })
+  }
+
   await bot.sendPhoto(
     chatId,
     product.img,
