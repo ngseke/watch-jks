@@ -3,6 +3,7 @@ module.exports = {
   parserOptions: {
     project: './tsconfig.json',
   },
+  ignorePatterns: ['dist'],
   rules: {
     'comma-dangle': 'off',
     '@typescript-eslint/comma-dangle': ['error', {
