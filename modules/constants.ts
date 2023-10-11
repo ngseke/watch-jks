@@ -9,4 +9,4 @@ export const FIREBASE_CONFIG = (() => {
     return {}
   }
 })()
-export const CRAWL_INTERVAL = Number(process.env.CRAWL_INTERVAL) || 1000 * 60 * 30
+export const CRAWL_INTERVAL = Number(process.env.CRAWL_INTERVAL) || 1000 * 60 * 10
