@@ -4,11 +4,6 @@ import { Product } from './products'
 
 let crawledAt: number = 0
 
-function extractBackground (background: string) {
-  const pattern = /(?:\(['"]?)(.*?)(?:['"]?\))/
-  return pattern.exec(background)?.[1] ?? ''
-}
-
 export function getCrawledAt () {
   return crawledAt
 }
