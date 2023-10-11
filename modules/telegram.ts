@@ -40,17 +40,6 @@ export async function sendToAllReceiver (product: Product) {
     })
   )
 }
-export async function sendRestartedMessageToAllReceiver () {
-  const receivers = await loadReceivers()
-
-  ;[...receivers].forEach((receiver) => {
-    bot.sendMessage(
-      receiver,
-      '<i>Bot restarted.</i>',
-      { parse_mode: 'HTML' }
-    )
-  })
-}
 
 const getDefaultMessage = async (chatId: number) => {
   const receivers = await loadReceivers()
@@ -115,6 +104,4 @@ export function startListener () {
       )
     })()
   })
-
-  sendRestartedMessageToAllReceiver()
 }
