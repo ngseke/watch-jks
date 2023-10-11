@@ -2,8 +2,8 @@ import dayjs from 'dayjs'
 import TelegramBot from 'node-telegram-bot-api'
 import { TELEGRAM_BOT_TOKEN } from './constants'
 import { getCrawledAt } from './crawler'
-import { loadProducts, loadRecentProducts, Product } from './products'
-import { addReceiver, loadReceivers, removeReceiver } from './receivers'
+import { Product } from './products'
+import { addSubscriber, getAllSubscriberIds, getRecentProducts, removeSubscriber } from './database'
 
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true })
 
@@ -31,19 +31,19 @@ export async function send (chatId: number, product: Product) {
   )
 }
 
-export async function sendToAllReceiver (product: Product) {
-  const receivers = await loadReceivers()
+export async function sendToAllSubscribers (product: Product) {
+  const subscriberIds = await getAllSubscriberIds()
 
   return await Promise.allSettled(
-    [...receivers].map(async chatId => {
+    subscriberIds.map(async chatId => {
       await send(chatId, product)
     })
   )
 }
 
 const getDefaultMessage = async (chatId: number) => {
-  const receivers = await loadReceivers()
-  const isSubscribed = receivers.has(chatId)
+  const subscriberIds = new Set(await getAllSubscriberIds())
+  const isSubscribed = subscriberIds.has(chatId)
 
   const subscribeStatusMessage = isSubscribed
     ? `\n✅ You are already subscribed. <i>(id: ${chatId})</i>`
@@ -54,15 +54,8 @@ const getDefaultMessage = async (chatId: number) => {
     ? `\n⏰ Last crawled at: <b>${formatDateTime(crawledAt)}</b>`
     : ''
 
-  const products = (await loadProducts())
-  const count = Object.keys(products).length
-  const countMessage = count
-    ? `\n⏰ Crawled products count: <b>${count}</b>`
-    : ''
-
   return [
     '🐟 Hi, I\'m Watch JKS Bot\n',
-    countMessage,
     crawledAtMessage,
     subscribeStatusMessage,
   ].join('')
@@ -77,22 +70,23 @@ export function startListener () {
 
     ;(async () => {
       if (maybeCommand === '/subscribe') {
-        await addReceiver(chatId)
+        await addSubscriber(chatId)
         await bot.sendMessage(chatId, 'You have successfully subscribed. 🎉')
         return
       }
 
       if (maybeCommand === '/unsubscribe') {
-        await removeReceiver(chatId)
+        await removeSubscriber(chatId)
         await bot.sendMessage(chatId, 'See you later. 👋')
         return
       }
 
       if (maybeCommand === '/showrecent') {
-        const recentProducts = await loadRecentProducts(5)
+        const recentProducts = await getRecentProducts(5)
 
         await Promise.allSettled(
-          recentProducts.map((product) => send(chatId, product))
+          Object.values(recentProducts)
+            .map((product) => send(chatId, product))
         )
         return
       }
