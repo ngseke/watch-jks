@@ -6,12 +6,11 @@
 
 ## Run
 
-```
+```bash
 cp .env.example .env
 pnpm i
 pnpm run dev
 ```
-
 
 ## Set up the bot
 
@@ -30,4 +29,16 @@ start - 🐟 Say hello
 showrecent - 👀 Show recent products
 subscribe - 🔔 Subscribe the bot
 unsubscribe - 🔕 Unsubscribe the bot
+```
+
+## Build Docker Image
+
+```bash
+docker build -t watch-jks .
+```
+
+## Run Docker Container
+
+```bash
+docker run --env-file .env -- watch-jks
 ```
