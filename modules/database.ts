@@ -4,7 +4,16 @@ import { firebaseDatabase } from './firebase'
 
 const productsRef = ref(firebaseDatabase, 'products')
 
+export const productsCache = new Map<string, Product>()
+
+export async function initProductsCache () {
+  const products = await getAllProducts()
+  Object.entries(products)
+    .forEach(([key, value]) => productsCache.set(key, value))
+}
+
 export async function checkProductExists (key: string) {
+  if (productsCache.has(key)) return true
   const snapshot = await get(child(productsRef, key))
   return snapshot.exists()
 }
@@ -13,8 +22,15 @@ export async function addProductFirebase (product: Product) {
   const { key } = product
   const exists = await checkProductExists(key)
   if (exists) return false
+
+  productsCache.set(key, product)
   await set(child(productsRef, key), product)
   return true
+}
+
+export async function getAllProducts () {
+  const snapshot = await get(productsRef)
+  return snapshot.val() as Record<string, Product>
 }
 
 export async function getRecentProducts (limit = 5) {
