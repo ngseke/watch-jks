@@ -1,16 +1,16 @@
 import { crawl } from './crawler'
-import { addProduct } from './products'
-import { sendToAllReceiver } from './telegram'
+import { addProductFirebase } from './database'
+import { sendToAllSubscribers } from './telegram'
 
 export async function task () {
   try {
     const products = await crawl()
     for (const product of products) {
-      const { isExists } = await addProduct(product)
-      if (isExists) continue
+      const success = await addProductFirebase(product)
+      if (!success) continue
 
       console.log('New Product!', product)
-      await sendToAllReceiver(product)
+      await sendToAllSubscribers(product)
     }
   } catch (e) {
     console.error('😢 Failed to crawl, will try again later\n', e)

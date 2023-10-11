@@ -1,0 +1,18 @@
+{
+  "rules": {
+    ".read": "auth !== null",
+    ".write": "auth !== null",
+    "products": {
+      ".indexOn": ["crawledAt"]
+    },
+    "subscribers": {
+      "$subscriber": {
+        ".read": true,
+        ".write": true,
+        "subscribedAt": {
+          ".validate": "newData.isNumber()"
+        }
+      }
+    }
+  }
+}
