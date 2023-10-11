@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "dev": "ts-node-dev index.ts",
-    "build": "rm -rf dist && ncc build index.ts -m -o dist",
+    "build": "rm -rf dist && ncc build index.ts -s -m -o dist",
     "start": "node dist/index",
     "lint": "npx eslint . --ext .ts,.js,.cjs",
     "lint:fix": "npx eslint --fix . --ext .ts,.js,.cjs"
