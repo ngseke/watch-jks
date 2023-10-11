@@ -4,6 +4,7 @@ const storeName = 'products'
 
 type ProductLink = string
 export interface Product {
+  key: string
   link: ProductLink
   img: string
   name: string
