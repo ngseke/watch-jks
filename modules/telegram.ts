@@ -62,53 +62,65 @@ const getDefaultMessage = async (chatId: number) => {
   ].join('\n')
 }
 
+export async function handleCommandSubscribe (chatId: number) {
+  await addSubscriber(chatId)
+  await bot.sendMessage(chatId, '✅ You have successfully subscribed.')
+}
+
+export async function handleCommandUnsubscribe (chatId: number) {
+  await removeSubscriber(chatId)
+  await bot.sendMessage(chatId, '👋 See ya.')
+}
+
+export async function handleCommandShowRecent (chatId: number, text: string) {
+  const maybeCommand = text.toLowerCase()
+
+  const limit = (() => {
+    try {
+      const limitString = maybeCommand.split('/recent')[1].trim()
+      // If the number is not provided, return default the limit.
+      if (!limitString) return 5
+
+      const maybeNumber = parseInt(limitString)
+      return maybeNumber || 0
+    } catch (e) {
+      return 0
+    }
+  })()
+  const [limitMin, limitMax] = [1, 30]
+
+  if (limit < limitMin || limit > limitMax) {
+    throw new RangeError(
+      `🔺 The limit should be in the range of ${limitMin} ~ ${limitMax}!`
+    )
+  }
+
+  const recentProducts = await getRecentProducts(limit)
+  await Promise.allSettled(
+    Object.values(recentProducts)
+      .map((product) => send(chatId, product))
+  )
+}
+
 export function startListener () {
   bot.on('text', async (message) => {
     const chatId = message.chat.id
     const text = message.text?.trim() ?? ''
-
     const maybeCommand = text.toLowerCase()
 
     try {
-      if (maybeCommand === '/subscribe') {
-        await addSubscriber(chatId)
-        await bot.sendMessage(chatId, '✅ You have successfully subscribed.')
-        return
+      const actions = {
+        '/subscribe': handleCommandSubscribe,
+        '/unsubscribe': handleCommandUnsubscribe,
+        '/recent': handleCommandShowRecent,
       }
 
-      if (maybeCommand === '/unsubscribe') {
-        await removeSubscriber(chatId)
-        await bot.sendMessage(chatId, '👋 See ya.')
-        return
-      }
+      const [, action] = Object.entries(actions)
+        .find(([commandPrefix]) => maybeCommand.startsWith(commandPrefix)) ??
+        []
 
-      if (maybeCommand.startsWith('/recent')) {
-        const limit = (() => {
-          try {
-            const limitString = maybeCommand.split('/recent')[1].trim()
-            // If the number is not provided, return default the limit.
-            if (!limitString) return 5
-
-            const maybeNumber = parseInt(limitString)
-            return maybeNumber || 0
-          } catch (e) {
-            return 0
-          }
-        })()
-        const [limitMin, limitMax] = [1, 30]
-        if (limit < limitMin || limit > limitMax) {
-          await bot.sendMessage(
-            chatId,
-            `🔺 The limit should be in the range of ${limitMin} ~ ${limitMax}!`
-          )
-          return
-        }
-
-        const recentProducts = await getRecentProducts(limit)
-        await Promise.allSettled(
-          Object.values(recentProducts)
-            .map((product) => send(chatId, product))
-        )
+      if (action) {
+        await action(chatId, text)
         return
       }
 
@@ -118,7 +130,17 @@ export function startListener () {
         { parse_mode: 'HTML' }
       )
     } catch (e) {
-      await bot.sendMessage(chatId, '🙁 Something went wrong...')
+      let errorMessage: string | undefined
+      if (e && typeof e === 'object' && 'message' in e && typeof e.message === 'string') {
+        errorMessage = e.message
+      }
+
+      await bot.sendMessage(
+        chatId,
+        ['🙁 Something went wrong...', errorMessage]
+          .filter(Boolean)
+          .join('\n')
+      )
     }
   })
 }
