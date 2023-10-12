@@ -1,6 +1,7 @@
-import { ref, set, get, child, serverTimestamp, query, orderByChild, limitToLast } from 'firebase/database'
-import { Product } from './products'
+import { ref, set, get, child, query, orderByChild, limitToLast } from 'firebase/database'
+import { Product } from '../types/Product'
 import { firebaseDatabase } from './firebase'
+import { Subscriber } from '../types/Subscriber'
 
 const productsRef = ref(firebaseDatabase, 'products')
 
@@ -49,34 +50,57 @@ export async function getRecentProducts (limit = 5) {
 
 const subscribersRef = ref(firebaseDatabase, 'subscribers')
 
-export async function checkSubscriberExists (id: number) {
+/**
+ * Create a record for the user first regardless of whether they want to subscribe or not
+ *
+ * @returns `true` if a new subscriber record is created; `false` if the record already exists
+ */
+export async function ensureSubscriber (id: number) {
   const snapshot = await get(child(subscribersRef, String(id)))
-  return snapshot.exists()
+  const exists = snapshot.exists()
+  if (exists) return false
+
+  const body: Subscriber = {
+    subscribedAt: +new Date(),
+    isSubscribed: false,
+  }
+  await set(child(subscribersRef, String(id)), body)
+  return true
 }
 
 export async function getSubscriber (id: number) {
+  await ensureSubscriber(id)
   const snapshot = await get(child(subscribersRef, String(id)))
-  return snapshot.val() as Record<string, any>
+  return snapshot.val() as Subscriber
 }
 
-export async function getAllSubscriberIds () {
+export async function getAllSubscribedSubscriberIds () {
   const snapshot = await get(subscribersRef)
   const ids: number[] = []
-  snapshot.forEach(({ key }) => {
-    ids.push(Number(key))
+  snapshot.forEach((child) => {
+    const value = child.val() as Subscriber
+    if (value.isSubscribed) {
+      ids.push(Number(child.key))
+    }
   })
+
   return ids
 }
 
 export async function addSubscriber (id: number) {
-  const exists = await checkSubscriberExists(id)
-  if (exists) return false
-  await set(child(subscribersRef, String(id)), {
-    subscribedAt: serverTimestamp(),
-  })
-  return true
+  await ensureSubscriber(id)
+  await setSubscriberIsSubscribed(id, true)
 }
 
 export async function removeSubscriber (id: number) {
-  await set(child(subscribersRef, String(id)), null)
+  await ensureSubscriber(id)
+  await setSubscriberIsSubscribed(id, false)
+}
+
+export async function setSubscriberIsSubscribed (
+  id: number,
+  isSubscribed: boolean
+) {
+  const ref = child(subscribersRef, `${String(id)}/isSubscribed`)
+  await set(ref, isSubscribed)
 }

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { JSDOM } from 'jsdom'
-import { Product } from './products'
+import { Product } from '../types/Product'
 import { md5 } from './md5'
 
 let crawledAt: number = 0

@@ -2,8 +2,8 @@ import dayjs from 'dayjs'
 import TelegramBot from 'node-telegram-bot-api'
 import { TELEGRAM_BOT_TOKEN } from './constants'
 import { getCrawledAt } from './crawler'
-import { Product } from './products'
-import { addSubscriber, getAllSubscriberIds, getRecentProducts, removeSubscriber } from './database'
+import { Product } from '../types/Product'
+import { addSubscriber, getAllSubscribedSubscriberIds, getRecentProducts, getSubscriber, removeSubscriber } from './database'
 
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true })
 
@@ -32,7 +32,7 @@ export async function send (chatId: number, product: Product) {
 }
 
 export async function sendToAllSubscribers (product: Product) {
-  const subscriberIds = await getAllSubscriberIds()
+  const subscriberIds = await getAllSubscribedSubscriberIds()
 
   return await Promise.allSettled(
     subscriberIds.map(async chatId => {
@@ -42,9 +42,7 @@ export async function sendToAllSubscribers (product: Product) {
 }
 
 const getDefaultMessage = async (chatId: number) => {
-  const subscriberIds = new Set(await getAllSubscriberIds())
-  const isSubscribed = subscriberIds.has(chatId)
-
+  const { isSubscribed } = await getSubscriber(chatId)
   const subscribeStatusMessage = isSubscribed
     ? `✅ You've already subscribed. <i>(id: ${chatId})</i>`
     : '💡 <b>Type /subscribe to subscribe now!</b>'

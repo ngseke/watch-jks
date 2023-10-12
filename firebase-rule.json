@@ -11,6 +11,9 @@
         ".write": true,
         "subscribedAt": {
           ".validate": "newData.isNumber()"
+        },
+        "isSubscribed": {
+          ".validate": "newData.isBoolean()"
         }
       }
     }
