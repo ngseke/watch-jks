@@ -6,8 +6,9 @@ RUN pnpm i
 RUN pnpm run build
 
 FROM node:16-alpine
+RUN apk add --no-cache tzdata
+ENV TZ="Asia/Taipei"
 WORKDIR /app
 COPY --from=builder /app/dist /app/dist
 COPY --from=builder /app/*.json /app
-EXPOSE 8080
 CMD ["npm", "start"]
