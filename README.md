@@ -26,7 +26,7 @@ Create your new bot with [BotFather](https://t.me/BotFather)
 
 ```
 start - 🐟 Say hello
-showrecent - 👀 Show recent products
+recent - 👀 Show recent products
 subscribe - 🔔 Subscribe the bot
 unsubscribe - 🔕 Unsubscribe the bot
 ```

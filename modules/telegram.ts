@@ -13,11 +13,11 @@ const formatDateTime = (value: dayjs.ConfigType) =>
 export async function send (chatId: number, product: Product) {
   const formattedPrice = new Intl.NumberFormat('en').format(product.price)
   const caption = [
-    '<b>[JKS New Product Notification]</b>',
     product.name,
     `<b>NT$ ${formattedPrice}</b>`,
     product.link,
-    `\n<i>(crawled at: ${formatDateTime(product.crawledAt)})</i>`,
+    '',
+    `<i>(crawled at: ${formatDateTime(product.crawledAt)})</i>`,
   ].join('\n')
 
   if (!product.img) {
@@ -46,19 +46,20 @@ const getDefaultMessage = async (chatId: number) => {
   const isSubscribed = subscriberIds.has(chatId)
 
   const subscribeStatusMessage = isSubscribed
-    ? `\n✅ You are already subscribed. <i>(id: ${chatId})</i>`
-    : '\n\n💡 Type /subscribe to subscribe now!'
+    ? `✅ You've already subscribed. <i>(id: ${chatId})</i>`
+    : '💡 <b>Type /subscribe to subscribe now!</b>'
 
   const crawledAt = getCrawledAt()
   const crawledAtMessage = crawledAt
-    ? `\n⏰ Last crawled at: <b>${formatDateTime(crawledAt)}</b>`
+    ? `⏰ Last crawled at: <b>${formatDateTime(crawledAt)}</b>`
     : ''
 
   return [
-    '🐟 Hi, I\'m Watch JKS Bot\n',
+    '🐟 Hi, I\'m Watch JKS Bot',
     crawledAtMessage,
+    '',
     subscribeStatusMessage,
-  ].join('')
+  ].join('\n')
 }
 
 export function startListener () {
@@ -71,19 +72,39 @@ export function startListener () {
     try {
       if (maybeCommand === '/subscribe') {
         await addSubscriber(chatId)
-        await bot.sendMessage(chatId, 'You have successfully subscribed. 🎉')
+        await bot.sendMessage(chatId, '✅ You have successfully subscribed.')
         return
       }
 
       if (maybeCommand === '/unsubscribe') {
         await removeSubscriber(chatId)
-        await bot.sendMessage(chatId, 'See ya.')
+        await bot.sendMessage(chatId, '👋 See ya.')
         return
       }
 
-      if (maybeCommand === '/showrecent') {
-        const recentProducts = await getRecentProducts(5)
+      if (maybeCommand.startsWith('/recent')) {
+        const limit = (() => {
+          try {
+            const limitString = maybeCommand.split('/recent')[1].trim()
+            // If the number is not provided, return default the limit.
+            if (!limitString) return 5
 
+            const maybeNumber = parseInt(limitString)
+            return maybeNumber || 0
+          } catch (e) {
+            return 0
+          }
+        })()
+        const [limitMin, limitMax] = [1, 30]
+        if (limit < limitMin || limit > limitMax) {
+          await bot.sendMessage(
+            chatId,
+            `🔺 The limit should be in the range of ${limitMin} ~ ${limitMax}!`
+          )
+          return
+        }
+
+        const recentProducts = await getRecentProducts(limit)
         await Promise.allSettled(
           Object.values(recentProducts)
             .map((product) => send(chatId, product))
@@ -97,7 +118,7 @@ export function startListener () {
         { parse_mode: 'HTML' }
       )
     } catch (e) {
-      await bot.sendMessage(chatId, 'Something went wrong... 🙁')
+      await bot.sendMessage(chatId, '🙁 Something went wrong...')
     }
   })
 }
