@@ -62,13 +62,13 @@ const getDefaultMessage = async (chatId: number) => {
 }
 
 export function startListener () {
-  bot.on('text', (message) => {
+  bot.on('text', async (message) => {
     const chatId = message.chat.id
     const text = message.text?.trim() ?? ''
 
     const maybeCommand = text.toLowerCase()
 
-    ;(async () => {
+    try {
       if (maybeCommand === '/subscribe') {
         await addSubscriber(chatId)
         await bot.sendMessage(chatId, 'You have successfully subscribed. 🎉')
@@ -77,7 +77,7 @@ export function startListener () {
 
       if (maybeCommand === '/unsubscribe') {
         await removeSubscriber(chatId)
-        await bot.sendMessage(chatId, 'See you later. 👋')
+        await bot.sendMessage(chatId, 'See ya.')
         return
       }
 
@@ -96,6 +96,8 @@ export function startListener () {
         await getDefaultMessage(chatId),
         { parse_mode: 'HTML' }
       )
-    })()
+    } catch (e) {
+      await bot.sendMessage(chatId, 'Something went wrong... 🙁')
+    }
   })
 }
