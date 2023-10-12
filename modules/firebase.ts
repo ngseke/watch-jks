@@ -9,7 +9,7 @@ export const firebaseDatabase = getDatabase(firebaseApp)
 export const auth = getAuth()
 signInAnonymously(auth)
 
-export function authReady () {
+export function waitForAuthReady () {
   return new Promise<void>((resolve) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
